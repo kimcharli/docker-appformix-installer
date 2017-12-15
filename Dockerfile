@@ -1,21 +1,17 @@
-# update .ssh/authorized_keys
-# docker build -t apfmx-installer .
-# docker tag apfmx-installer kimcharli/appformix-installer
-# docker push kimcharli/appformix-installer
-
-FROM kimcharli/apfmx-installer-base:01
+FROM kimcharli/appformix-installer-base:0.0.1
 
 LABEL maintainer="kimcharli@gmail.com"
 
 WORKDIR /root
-COPY .ssh /root/.ssh
+RUN ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
 
-#ENV NOTVISIBLE "in users profile"
-#RUN sh setup.sh
-RUN chmod 600 .ssh/id_rsa && chmod 600 .ssh/authorized_keys
+COPY ssh-config /root/.ssh/config
+COPY public_keys /root/.ssh/authorized_keys
+RUN chmod 600 /root/.ssh/authorized_keys
+RUN echo '' >> /root/.ssh/authorized_keys
+RUN cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 
 EXPOSE 22
 
-#CMD ["/usr/sbin/sshd", "-D"]
 ENTRYPOINT ["/usr/sbin/sshd", "-D"]
 
